@@ -48,42 +48,36 @@ struct configuracao {
     rnd.seed(seed2); 
   }
   
-  inline double get_gaussian()
-  {
+  inline double get_gaussian(){
     return normal_dist(rnd);
   }
   
-  inline double get_uniform()
-  {
+  inline double get_uniform(){
     return uniform_dist(rnd);
   }
 
-  double ljones(double sig, double eps, double r) //funcao que da a forca de lennard jones
-  {
+  double ljones(double sig, double eps, double r){ //funcao que da a forca de lennard jones
+
     double u;
-    if (r != 0)  
-    {
+    if (r != 0){
       u = 24. * eps * (2 * std::pow((sig/r),12) - std::pow(sig/r,6)) / r;
       u /= r; //divisao por r por causa do versor para converter as aleceracoes em ax,ay
     }
-    else if (r == 0)  //retorna zero se estivermos a considerar a interacao da particula com ela propria
-    {
+    else if (r == 0){  //retorna zero se estivermos a considerar a interacao da particula com ela propria
       u = 0;
     }
     return u;
   }
 
-  double fs(double r) //outros potenciais experimentados para testar o programa
-  {
+  double fs(double r){ //outros potenciais experimentados para testar o programa
+
     double u;
-    if (r != 0)
-    {
+    if (r != 0){
       //u = 1 / (r + 1);
       u = 0.5 * std::pow(r,2);
       u /= r;
     }
-    else if (r == 0)
-    {
+    else if (r == 0){
       u = 0;
     }
     
@@ -91,41 +85,36 @@ struct configuracao {
   }
 
 
-  void init_positions() //gera posicoes com uma distribuicao uniforme entr 0 e 1
-  {
-    
-    for(unsigned i = 0; i < N; i++)
-      {
+  void init_positions(){ //gera posicoes com uma distribuicao uniforme entr 0 e 1
+
+    for(unsigned i = 0; i < N; i++){
 	      rx(i) = get_uniform();
 	      ry(i) = get_uniform();
       }  
   }
   
   
-  void init_velocities() //gera velocidades com distribuicao gaussiana
-  {
+  void init_velocities(){ //gera velocidades com distribuicao gaussiana
     
-    for(unsigned i = 0; i < N; i++)
-      {
+    for(unsigned i = 0; i < N; i++){
       	vx(i) = sqrt(T/m)*get_gaussian();
 	      vy(i) = sqrt(T/m)*get_gaussian();
       }  
 
   }
   
-  void return_positions() //funcao principal
-  {
+  void return_positions(){ //funcao principal
+
     init_positions();
     init_velocities();
-    for(unsigned i = 0; i < t; i++) //ciclo sobre todos os tempos
-    {
+    for(unsigned i = 0; i < t; i++){ //ciclo sobre todos os tempos
+     
       rx0 = rx;  //arrays que registam as posicoes e velocidades das particulas em cada tempo para
       ry0 = ry;  //a comparacao entre elas ser num tempo fixo
       vx0 = vx;
       vy0 = vy;
 
-      for(unsigned j = 0; j < N; j++) //ciclo sobre todas as particulas
-      {
+      for(unsigned j = 0; j < N; j++){ //ciclo sobre todas as particulas
 
         rx_total(i,j) = rx(j); //preenche um array com os tempos como linhas e posicao das particulas em colunas para registo total
         ry_total(i,j) = ry(j);
@@ -138,8 +127,7 @@ struct configuracao {
         double lj = 0;
 
 
-        for(unsigned k = 0; k < N; k++)
-        {
+        for(unsigned k = 0; k < N; k++){
           r_temp = std::pow(std::pow((rx0(k) - rx0(j)),2) + std::pow((ry0(k) - ry0(j)),2),0.5); //distancia entre as particulas
           //lj = fs(r_temp);
           lj = ljones(sig,eps,r_temp);
@@ -149,38 +137,29 @@ struct configuracao {
         x_temp = rx(j) + vx(j) * delta_t + 0.5 * ax_temp * std::pow(delta_t,2); //posicoes propostas com metodo de Euler
         y_temp = ry(j) + vy(j) * delta_t + 0.5 * ay_temp * std::pow(delta_t,2);
 
-        if (x_temp > L || x_temp < 0)                //condicoes fronteira para saida da caixa em x
-        {
+        if (x_temp > L || x_temp < 0){                //condicoes fronteira para saida da caixa em x
           vx(j) *= -1;                               //inversao da velocidade
           if (x_temp > L)
-          {
             rx(j) = L - (x_temp - L);                //posicao refletida se sair pelo lado direito
-          }
 
           else if (x_temp < 0)                    
-          {
             rx(j) = x_temp * -1;                     //posicao refletida se sair pelo lado esquerdo
-          }
+
         }
-        else if (x_temp <= L && x_temp >= 0)         //condicao para a particula se manter na caixa sem interagir com a fronteira
-        {
+        else if (x_temp <= L && x_temp >= 0){         //condicao para a particula se manter na caixa sem interagir com a fronteira
           rx(j) = x_temp;                            //aceitacao do valor proposto
         }
 
 
 
-        if (y_temp > L || y_temp < 0)                //condicoes fronteira para a saida da caixa em y analogo a x
-        { 
+        if (y_temp > L || y_temp < 0){                //condicoes fronteira para a saida da caixa em y analogo a x
           vy(j) *= -1;
           if (y_temp > L)
-          {
             ry(j) = L - (y_temp - L);
-          }
 
           else if (y_temp < 0)
-          {
             ry(j) = y_temp * -1;
-          }
+
         }
         else if (y_temp <= L && y_temp >= 0){
           ry(j) = y_temp;
@@ -227,8 +206,7 @@ struct configuracao {
 
 
 
-int main()
-{
+int main(){
   const unsigned                              N = 25;   // Numero de particulas
   double                                    T = 200;   // Temperatura
   double                   m = 1.* std::pow(10,-19) ;   // massa de cada particula
